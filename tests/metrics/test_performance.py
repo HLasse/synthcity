@@ -94,6 +94,7 @@ def test_evaluate_performance_classifier(
 @pytest.mark.xfail
 @pytest.mark.skipif(sys.platform != "linux", reason="Linux only for faster results")
 @pytest.mark.skipif(sys.version_info < (3, 9), reason="requires python3.9 or higher")
+@pytest.mark.slow
 def test_evaluate_feature_importance_rank_dist_clf(
     distance: str, test_plugin: Plugin
 ) -> None:
@@ -182,6 +183,7 @@ def test_evaluate_performance_regression(
 @pytest.mark.xfail
 @pytest.mark.skipif(sys.platform != "linux", reason="Linux only for faster results")
 @pytest.mark.skipif(sys.version_info < (3, 9), reason="requires python3.9 or higher")
+@pytest.mark.slow
 def test_evaluate_feature_importance_rank_dist_reg(
     distance: str, test_plugin: Plugin
 ) -> None:
@@ -252,7 +254,11 @@ def test_evaluate_performance_survival_analysis(
     assert "syn_ood.brier_score" in good_score
 
     sz = 100
-    X_rnd = pd.DataFrame(np.random.randn(sz, len(X.columns)), columns=X.columns)
+    X_rnd = pd.DataFrame(
+        np.random.randn(sz, len(X.columns) - 1),
+        columns=[col for col in X.columns if col != "week"],
+    )
+    X_rnd.insert(loc=0, column="week", value=np.random.randint(1, 52, size=sz))
     X_rnd["arrest"] = 1
     score = evaluator.evaluate(
         Xloader,
@@ -290,6 +296,7 @@ def test_evaluate_performance_survival_analysis(
 @pytest.mark.xfail
 @pytest.mark.skipif(sys.platform != "linux", reason="Linux only for faster results")
 @pytest.mark.skipif(sys.version_info < (3, 9), reason="requires python3.9 or higher")
+@pytest.mark.slow
 def test_evaluate_feature_importance_rank_dist_surv(
     distance: str, test_plugin: Plugin
 ) -> None:
@@ -356,7 +363,7 @@ def test_evaluate_performance_custom_labels(
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize("test_plugin", [Plugins().get("marginal_distributions")])
+@pytest.mark.parametrize("test_plugin", [Plugins().get("timegan")])
 @pytest.mark.parametrize(
     "evaluator_t",
     [
@@ -456,7 +463,6 @@ def test_evaluate_performance_time_series_survival(
     assert "syn_id.brier_score" in good_score
     assert "syn_ood.c_index" in good_score
     assert "syn_ood.brier_score" in good_score
-    print(evaluator_t, good_score)
 
     assert good_score["syn_id.c_index"] < 1
     assert good_score["syn_ood.c_index"] < 1
@@ -466,6 +472,7 @@ def test_evaluate_performance_time_series_survival(
     assert def_score == good_score["syn_id.c_index"] - good_score["syn_id.brier_score"]
 
 
+@pytest.mark.slow
 def test_image_support_perf() -> None:
     dataset = datasets.MNIST(".", download=True)
 

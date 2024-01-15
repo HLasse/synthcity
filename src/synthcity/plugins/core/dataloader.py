@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 # third party
 import numpy as np
+import numpy.ma as ma
 import pandas as pd
 import PIL
 import torch
@@ -16,7 +17,7 @@ from torchvision import transforms
 # synthcity absolute
 from synthcity.plugins.core.constraints import Constraints
 from synthcity.plugins.core.dataset import FlexibleDataset, TensorDataset
-from synthcity.plugins.core.models.data_encoder import DatetimeEncoder
+from synthcity.plugins.core.models.feature_encoder import DatetimeEncoder
 from synthcity.utils.compression import compress_dataset, decompress_dataset
 from synthcity.utils.serialization import dataframe_hash
 
@@ -524,7 +525,12 @@ class SurvivalAnalysisDataLoader(DataLoader):
             )
 
         T = data[time_to_event_column]
-        data = data[T > 0]
+        data_filtered = data[T > 0]
+        row_diff = data.shape[0] - data_filtered.shape[0]
+        if row_diff > 0:
+            raise ValueError(
+                f"The time_to_event_column contains {row_diff} values less than or equal to zero. Please remove them."
+            )
 
         if len(time_horizons) == 0:
             time_horizons = np.linspace(T.min(), T.max(), num=5)[1:-1].tolist()
@@ -923,10 +929,23 @@ class TimeSeriesDataLoader(DataLoader):
                 self.data["outcome"],
             )
         if as_numpy:
+            longest_observation_seq = max([len(seq) for seq in temporal_data])
             return (
                 np.asarray(static_data),
-                np.asarray(temporal_data),
-                np.asarray(observation_times),
+                np.asarray(
+                    pd.concat(temporal_data)
+                ),  # TODO: check this works with time series benchmarks
+                # masked array to handle variable length sequences
+                ma.vstack(
+                    [
+                        ma.array(
+                            np.resize(ot, longest_observation_seq),
+                            mask=[True for i in range(len(ot))]
+                            + [False for j in range(longest_observation_seq - len(ot))],
+                        )
+                        for ot in observation_times
+                    ]
+                ),
                 np.asarray(outcome),
             )
         return (
@@ -1284,7 +1303,6 @@ class TimeSeriesDataLoader(DataLoader):
         fill: Any = np.nan,
         seq_offset: int = 0,
     ) -> pd.DataFrame:
-
         # Temporal data: (subjects, temporal_sequence, temporal_feature)
         temporal_features = TimeSeriesDataLoader.unique_temporal_features(temporal_data)
         temporal_features, mask_features = TimeSeriesDataLoader.extract_masked_features(

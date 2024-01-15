@@ -20,7 +20,9 @@ from tsai.models.XCM import XCM
 
 # synthcity absolute
 import synthcity.logger as log
-from synthcity.plugins.core.models.mlp import MLP, MultiActivationHead, get_nonlin
+from synthcity.plugins.core.models.factory import get_nonlin
+from synthcity.plugins.core.models.layers import MultiActivationHead
+from synthcity.plugins.core.models.mlp import MLP
 from synthcity.utils.constants import DEVICE
 from synthcity.utils.reproducibility import enable_reproducible_results
 from synthcity.utils.samplers import ImbalancedDatasetSampler
@@ -253,6 +255,7 @@ class TimeSeriesModel(nn.Module):
             raise ValueError("NaNs detected in the temporal horizons")
 
         if self.use_horizon_condition:
+            # TODO: ADD error handling for len(temporal_data.shape) != 3 or len(observation_times.shape) != 2
             temporal_data_merged = torch.cat(
                 [temporal_data, observation_times.unsqueeze(2)], dim=2
             )
@@ -491,7 +494,6 @@ class TimeSeriesModel(nn.Module):
     ) -> Tuple:
         static_data = np.asarray(static_data)
         temporal_data = np.asarray(temporal_data)
-        observation_times = np.asarray(observation_times)
         if outcome is not None:
             outcome = np.asarray(outcome)
 
@@ -517,7 +519,7 @@ class TimeSeriesModel(nn.Module):
             )
             temporal_data_t = self._check_tensor(local_temporal_data).float()
             local_observation_times = np.array(
-                observation_times[indices].tolist()
+                [observation_times[i] for i in indices]
             ).astype(float)
             observation_times_t = self._check_tensor(local_observation_times).float()
 

@@ -41,7 +41,7 @@ class Schema(BaseModel):
     """
 
     sampling_strategy: str = "marginal"  # uniform or marginal
-    protected_cols = ["seq_id"]
+    protected_cols: List[str] = ["seq_id"]
     random_state: int = 0
     data: Any = None
     domain: Dict = {}
@@ -73,7 +73,7 @@ class Schema(BaseModel):
                     feature_domain[col] = CategoricalDistribution(
                         name=col, data=X[col], random_state=random_state
                     )
-                elif X[col].dtype.kind == "i":
+                elif X[col].dtype.kind in ["i", "u"]:
                     feature_domain[col] = IntegerDistribution(
                         name=col, data=X[col], random_state=random_state
                     )
@@ -95,7 +95,7 @@ class Schema(BaseModel):
                         choices=list(X[col].unique()),
                         random_state=random_state,
                     )
-                elif X[col].dtype.kind == "i":
+                elif X[col].dtype.kind in ["i", "u"]:
                     feature_domain[col] = IntegerDistribution(
                         name=col,
                         low=X[col].min(),

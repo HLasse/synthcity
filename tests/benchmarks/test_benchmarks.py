@@ -4,6 +4,7 @@ import json
 import platform
 from copy import copy
 from pathlib import Path
+from typing import Any, List
 
 # third party
 import pytest
@@ -12,10 +13,16 @@ from sklearn.datasets import load_diabetes, load_iris
 
 # synthcity absolute
 from synthcity.benchmark import Benchmarks
+from synthcity.benchmark.utils import get_json_serializable_kwargs
+from synthcity.plugins import Plugins
 from synthcity.plugins.core.dataloader import (
+    DataLoader,
     GenericDataLoader,
     SurvivalAnalysisDataLoader,
 )
+from synthcity.plugins.core.distribution import Distribution
+from synthcity.plugins.core.plugin import Plugin
+from synthcity.plugins.core.schema import Schema
 
 
 def test_benchmark_sanity() -> None:
@@ -219,8 +226,14 @@ def test_benchmark_workspace_cache() -> None:
 
     testcase = "test1"
     plugin = "uniform_sampler"
+    kwargs = {"workspace": Path("workspace_test")}
 
     kwargs_hash = ""
+    if len(kwargs) > 0:
+        serializable_kwargs = get_json_serializable_kwargs(kwargs)
+        kwargs_hash_raw = json.dumps(serializable_kwargs, sort_keys=True).encode()
+        hash_object = hashlib.sha256(kwargs_hash_raw)
+        kwargs_hash = hash_object.hexdigest()
 
     augmentation_arguments = {
         "augmentation_rule": "equal",
@@ -238,7 +251,7 @@ def test_benchmark_workspace_cache() -> None:
 
     Benchmarks.evaluate(
         [
-            (testcase, plugin, {}),
+            (testcase, plugin, kwargs),
         ],
         X,
         task_type="survival_analysis",
@@ -256,7 +269,6 @@ def test_benchmark_workspace_cache() -> None:
     assert workspace.exists()
 
     for repeat in range(repeats):
-
         X_syn_cache_file = (
             workspace
             / f"{experiment_name}_{testcase}_{plugin}_{kwargs_hash}_{platform.python_version()}_{repeat}.bkp"
@@ -280,3 +292,55 @@ def test_benchmark_workspace_cache() -> None:
 
         assert X_augment_cache_file.exists()
         assert augment_generator_file.exists()
+
+
+def test_benchmark_added_plugin() -> None:
+    X, y = load_iris(return_X_y=True, as_frame=True)
+    X["target"] = y
+
+    class DummyCopyDataPlugin(Plugin):
+        """Dummy plugin for debugging."""
+
+        def __init__(self, **kwargs: Any) -> None:
+            super().__init__(**kwargs)
+
+        @staticmethod
+        def name() -> str:
+            return "copy_data"
+
+        @staticmethod
+        def type() -> str:
+            return "debug"
+
+        @staticmethod
+        def hyperparameter_space(*args: Any, **kwargs: Any) -> List[Distribution]:
+            return []
+
+        def _fit(
+            self, X: DataLoader, *args: Any, **kwargs: Any
+        ) -> "DummyCopyDataPlugin":
+            self.features_count = X.shape[1]
+            self.X = X
+            return self
+
+        def _generate(
+            self, count: int, syn_schema: Schema, **kwargs: Any
+        ) -> DataLoader:
+            return self.X.sample(count)
+
+    generators = Plugins()
+    # Add the new plugin to the collection
+    generators.add("copy_data", DummyCopyDataPlugin)
+
+    score = Benchmarks.evaluate(
+        [
+            ("copy_data", "copy_data", {}),
+        ],
+        GenericDataLoader(X, target_column="target"),
+        metrics={
+            "performance": [
+                "linear_model",
+            ]
+        },
+    )
+    assert "copy_data" in score

@@ -5,21 +5,22 @@
 </h2>
 
 <h4 align="center">
-    A library for generating and evaluating synthetic tabular data..
+    A library for generating and evaluating synthetic tabular data.
 </h4>
 
 
 <div align="center">
 
 [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Vr2PJswgfFYBkJCm3hhVkuH-9dXnHeYV?usp=sharing)
-[![Tests Python](https://github.com/vanderschaarlab/synthcity/actions/workflows/test.yml/badge.svg)](https://github.com/vanderschaarlab/synthcity/actions/workflows/test.yml)
+[![Tests Quick Python](https://github.com/vanderschaarlab/synthcity/actions/workflows/test_pr.yml/badge.svg)](https://github.com/vanderschaarlab/synthcity/actions/workflows/test_pr.yml)
+[![Tests Full Python](https://github.com/vanderschaarlab/synthcity/actions/workflows/test_full.yml/badge.svg)](https://github.com/vanderschaarlab/synthcity/actions/workflows/test_full.yml)
 [![Tutorials](https://github.com/vanderschaarlab/synthcity/actions/workflows/test_tutorials.yml/badge.svg)](https://github.com/vanderschaarlab/synthcity/actions/workflows/test_tutorials.yml)
 [![Documentation Status](https://readthedocs.org/projects/synthcity/badge/?version=latest)](https://synthcity.readthedocs.io/en/latest/?badge=latest)
 [![arXiv](https://img.shields.io/badge/arXiv-2301.07573-b31b1b.svg)](https://arxiv.org/abs/2301.07573)
 
 [![](https://pepy.tech/badge/synthcity)](https://pypi.org/project/synthcity/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/vanderschaarlab/synthcity/blob/main/LICENSE)
-[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/release/python-380/)
 [![about](https://img.shields.io/badge/about-The%20van%20der%20Schaar%20Lab-blue)](https://www.vanderschaar-lab.com/)
 [![slack](https://img.shields.io/badge/chat-on%20slack-purple?logo=slack)](https://join.slack.com/t/vanderschaarlab/shared_invite/zt-1pzy8z7ti-zVsUPHAKTgCd1UoY8XtTEw)
 
@@ -32,7 +33,7 @@
 - :key: Easy to extend pluginable architecture.
 - :cyclone: Several evaluation metrics for correctness and privacy.
 - :fire: Several reference models, by type:
-    - General purpose: GAN-based (AdsGAN, CTGAN, PATEGAN, DP-GAN),VAE-based(TVAE, RTVAE), Normalizing flows, Bayesian Networks(PrivBayes, BN).
+    - General purpose: GAN-based (AdsGAN, CTGAN, PATEGAN, DP-GAN),VAE-based(TVAE, RTVAE), Normalizing flows, Bayesian Networks(PrivBayes, BN), Random Forrest (arfpy), LLM-based (GReaT).
     - Time Series & Time-Series Survival generators: TimeGAN, FourierFlows, TimeVAE.
     - Static Survival Analysis: SurvivalGAN, SurVAE.
     - Privacy-focused: DECAF, DP-GAN, AdsGAN, PATEGAN, PrivBayes.
@@ -40,6 +41,8 @@
     - Images: Image ConditionalGAN, Image AdsGAN.
 - :book: [Read the docs !](https://synthcity.readthedocs.io/)
 - :airplane: [Checkout the tutorials!](https://github.com/vanderschaarlab/synthcity#-tutorials)
+
+*Please note: synthcity does not handle missing data and so these values must be imputed first [HyperImpute](https://github.com/vanderschaarlab/hyperimpute) can be used to do this.*
 
 ## :rocket: Installation
 
@@ -51,6 +54,20 @@ or from source, using
 ```bash
 $ pip install .
 ```
+Other library extensions:
+ * Install the library with unit-testing support
+```bash
+ pip install synthcity[testing]
+```
+ * Install the library with GOGGLE support
+```bash
+ pip install synthcity[goggle]
+```
+ * Install the library with ALL the extensions
+```bash
+ pip install synthcity[all]
+```
+
 
 ## :boom: Sample Usage
 
@@ -258,14 +275,16 @@ assert syn_model.name() == reloaded.name()
 
 ## 📓 Tutorials
 
- - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Vr2PJswgfFYBkJCm3hhVkuH-9dXnHeYV?usp=sharing) [ Tutorial 0: Getting started with tabular data](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial0_basic_examples.ipynb)
-  - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1rTTvV4FT-Ut-rIHoBPXQimiBlZ7zCv59?usp=sharing) [ Tutorial 1: Writing a new plugin](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial1_add_a_new_plugin.ipynb)
-   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FXpnQ9bpHzEgJgD-9pf_PPN4D80ENilE?usp=sharing) [ Tutorial 2: Benchmarking models](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial2_benchmarks.ipynb)
-   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Wa2CPsbXzbKMPC5fSBhKl00Gi7QqVkse?usp=sharing) [ Tutorial 3: Generating Survival Analysis data](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial3_survival_analysis.ipynb)
-   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1jN36GCAKEkjzDlczmQfR7Wbh3yF3cIz5?usp=sharing) [ Tutorial 4: Generating Time Series](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial4_time_series.ipynb)
-   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Nf8d3Y6sXr1uco8MsJA4wb33iFvReL59?usp=sharing) [ Tutorial 5: Generating Data with Differential Privacy Guarantees](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial5_differential_privacy.ipynb)
-   - [ Tutorial 6 for using Custom Time series data](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial6_time_series_data_preparation.ipynb)
-   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1gEUSGxVmts9C0cDBKbq7Ees-wvQpUBoo?usp=sharing) [ Tutorial 7: Image generation](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial7_image_generation_using_mednist.ipynb)
+ - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial0_basic_examples.ipynb) [ Tutorial 0: Getting started with tabular data](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial0_basic_examples.ipynb)
+  - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial1_add_a_new_plugin.ipynb) [ Tutorial 1: Writing a new plugin](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial1_add_a_new_plugin.ipynb)
+   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial2_benchmarks.ipynb) [ Tutorial 2: Benchmarking models](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial2_benchmarks.ipynb)
+   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial3_survival_analysis.ipynb) [ Tutorial 3: Generating Survival Analysis data](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial3_survival_analysis.ipynb)
+   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial4_time_series.ipynb) [ Tutorial 4: Generating Time Series](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial4_time_series.ipynb)
+   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial5_differential_privacy.ipynb) [ Tutorial 5: Generating Data with Differential Privacy Guarantees](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial5_differential_privacy.ipynb)
+   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial6_time_series_data_preparation.ipynb) [ Tutorial 6: Practice using Custom Time series data](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial6_time_series_data_preparation.ipynb)
+   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial7_image_generation_using_mednist.ipynb) [ Tutorial 7: Image generation](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial7_image_generation_using_mednist.ipynb)
+   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial8_hyperparameter_optimization.ipynb) [ Tutorial 8: hyperparameter optimization](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial8_hyperparameter_optimization.ipynb)
+   - [![Test In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vanderschaarlab/synthcity/blob/main/tutorials/tutorial9_dealing_with_missing_data.ipynb) [ Tutorial 9: dealing with missing data](https://github.com/vanderschaarlab/synthcity/blob/main/tutorials/tutorial9_dealing_with_missing_data.ipynb)
 
 ## 🔑 Methods
 
@@ -296,6 +315,31 @@ assert syn_model.name() == reloaded.name()
 |--- | --- | --- |
 |**nflow**| Normalizing Flows are generative models which produce tractable distributions where both sampling and density evaluation can be efficient and exact.| [Neural Spline Flows](https://arxiv.org/abs/1906.04032) |
 
+### Graph neural networks
+
+| Method | Description | Reference |
+|--- | --- | --- |
+|**goggle**| GOGGLE: Generative Modelling for Tabular Data by Learning Relational Structure | [Paper](https://openreview.net/forum?id=fPVRcJqspu) |
+
+
+### Diffusion models
+
+| Method | Description | Reference |
+|--- | --- | --- |
+|**ddpm**| TabDDPM: Modelling Tabular Data with Diffusion Models. | [Paper](https://arxiv.org/abs/2209.15421) |
+
+### Random Forest models
+
+| Method | Description | Reference |
+|--- | --- | --- |
+|**arfpy**| Adversarial Random Forests for Density Estimation and Generative Modeling | [Paper](https://proceedings.mlr.press/v206/watson23a.html) |
+
+### LLM-based models
+
+| Method | Description | Reference |
+|--- | --- | --- |
+|**GReaT**| Language Models are Realistic Tabular Data Generators | [Paper](https://openreview.net/forum?id=cEygmQNOeI) |
+
 ### Static Survival analysis methods
 
 | Method | Description | Reference |
@@ -311,7 +355,6 @@ assert syn_model.name() == reloaded.name()
 |--- | --- | --- |
 | **timegan** | TimeGAN is a framework for generating realistic time-series data that combines the flexibility of the unsupervised paradigm with the control afforded by supervised training. Through a learned embedding space jointly optimized with both supervised and adversarial objectives, the network adheres to the dynamics of the training data during sampling.  | [Time-series Generative Adversarial Networks](https://proceedings.neurips.cc/paper/2019/file/c9efe5f26cd17ba6216bbe2a7d26d490-Paper.pdf) |
 | **fflows** |  FFlows is an explicit likelihood model based on a novel class of normalizing flows that view time-series data in the frequency-domain rather than the time-domain. The method uses a discrete Fourier transform (DFT) to convert variable-length time-series with arbitrary sampling periods into fixed-length spectral representations, then applies a (data-dependent) spectral filter to the frequency-transformed time-series.  | [Generative Time-series Modeling with Fourier Flows](https://openreview.net/forum?id=PpshD0AXfA) |
-| **probabilistic_ar** | Probabilistic AutoRegressive model allows learning multi-type, multivariate timeseries data and later on generate new synthetic data that has the same format and properties as the learned one. | [PAR model](https://sdv.dev/SDV/user_guides/timeseries/par.html#what-is-par) |
 
 
 ### Privacy & Fairness
@@ -407,6 +450,17 @@ _Quasi-identifiers_ : pieces of information that are not of themselves unique id
 |**sensitive_data_reidentification_xgb**|Sensitive data prediction from the quasi-identifiers using an XGBoost.|0 for no risk.|
 |**sensitive_data_reidentification_mlp**|Sensitive data prediction from the quasi-identifiers using a Neural Net.|0 for no risk.|
 
+## :mag: Use-cases of synthetic data beyond fidelity & privacy
+
+The following table contains research projects and papers that have been completed using Synthcity. Feel free to explore them and be inspired to use Synthcity in your own research project!
+
+|Project|Description|Code|Paper|
+|-------|-----------|----|-----|
+|Synthetic data capturing nuances of real data|Ensuring that synthetic data mirrors the complex nuances of real-world data is a challenging task. This paper addresses this issue by exploring the potential of integrating data-centric AI techniques which profile the data to guide the synthetic data generation process.| [Code](https://github.com/vanderschaarlab/data-centric-synthetic-data)|[NeurIPS 2023 paper](https://arxiv.org/abs/2310.16981)|
+|Model Evaluation/Testing|This paper aim to improve model evaluation with synthetic test data|[Code](https://github.com/vanderschaarlab/3S-Testing)|[NeurIPS 2023 paper](https://neurips.cc/virtual/2023/poster/70210)|
+|Generative uncertainty|This paper explores how the generative process affects the downstream ML task. |[Code](https://github.com/vanderschaarlab/deep_generative_ensemble)|[ICML 2023 paper](https://arxiv.org/abs/2305.09235)|
+|Benchmarking Synthcity|This paper employs synthcity's benchmarking pipeline to compare different SOTA methods across multiple openml datasets. The paper aims to introduce the wider ML community to Synthcity.| [Code](https://github.com/vanderschaarlab/synthcity-benchmark)|[NeurIPS 2023 paper](https://arxiv.org/abs/2301.07573)|
+
 ## :hammer: Tests
 
 Install the testing dependencies using
@@ -417,6 +471,90 @@ The tests can be executed using
 ```bash
 pytest -vsx
 ```
+
+# Contributing to Synthcity
+
+We want to make contributing to Synthcity is as easy and transparent as possible. We hope to collaborate with as many people as we can.
+
+
+## Development installation
+
+First create a new environment. It is recommended that you use conda. This can be done as follows:
+```bash
+conda create -n your-synthcity-env python=3.9
+conda activate your-synthcity-env
+```
+*Python versions 3.7, 3.8, 3.9, and 3.10 are all compatible, but it is best to use the most up to date version you can, as some models may not support older python versions.*
+
+To get the development installation with all the necessary dependencies for
+linting, testing, auto-formatting, and pre-commit etc. run the following:
+```bash
+git clone https://github.com/vanderschaarlab/synthcity.git
+cd synthcity
+pip install -e .[testing]
+```
+
+Please check that the pre-commit is properly installed for the repository, by running:
+```bash
+pre-commit run --all
+```
+This checks that you are set up properly to contribute, such that you will match the code style in the rest of the project. This is covered in more detail below.
+
+
+## Our Development Process
+
+### Code Style
+
+We believe that having a consistent code style is incredibly important. Therefore Synthcity imposes certain rules on the code that is contributed and the automated tests will not pass, if the style is not adhered to. These tests passing is a requirement for a contribution being merged. However, we make adhering to this code style as simple as possible. First, all the libraries required to produce code that is compatible with Synthcity's Code Style are installed in the step above when you set up the development environment. Secondly, these libraries are all triggered by pre-commit, so once you are set-up, you don't need to do anything. When you run `git commit`, any simple changes to enforce the style will run automatically and other required changes are explained in the stdout for you to go through and fix.
+
+Synthcity uses the [black](https://github.com/ambv/black) and [flake8](https://github.com/PyCQA/flake8) code formatter to enforce a common code style across the code base. No additional configuration should be needed (see the [black documentation](https://black.readthedocs.io/en/stable/installation_and_usage.html#usage) for advanced usage).
+
+Also, Synthcity uses [isort](https://github.com/timothycrosley/isort) to sort imports alphabetically and separate into sections.
+
+
+#### Type Hints
+
+Synthcity is fully typed using python 3.7+ [type hints](https://www.python.org/dev/peps/pep-0484/). This is enforced for contributions by [mypy](https://github.com/python/mypy), which is a static type-checker.
+
+
+#### Tests
+
+To run the tests, you can either use `pytest` (again, installed with the testing extra above).
+The following testing command is good for checking your code,as it skips the tests that take a long time to run.
+```bash
+pytest -vvvsx -m "not slow" --durations=50
+```
+
+But the full test suite can be run with the following command.
+```bash
+pytest -vvvs  --durations=50
+```
+
+Some plugins may be included in the library as extras, the associated tests for these need to be run separately, e.g. the goggle plugin can be tested with the below command:
+```bash
+pytest -vvvs -k goggle --durations=50
+```
+## Pull Requests
+We actively welcome your pull requests.
+
+1. Fork the repo and create your branch from `main`.
+2. If you have added code that should be tested, add tests in the same style as those already present in the repo.
+3. If you have changed APIs, document the API change in the PR.
+4. Ensure the test suite passes.
+5. Make sure your code passes the pre-commit, this will be required in order to commit and push, if you have properly installed pre-commit, which is included in the testing extra.
+
+
+## Issues
+
+We use GitHub issues to track public bugs. Please ensure your description is
+clear and has sufficient instructions to be able to reproduce the issue.
+
+
+## License
+
+By contributing to Synthcity, you agree that your contributions will be licensed
+under the LICENSE file in the root directory of this source tree. You should therefore, make sure that if you have introduced any dependencies that they also are covered by a license that allows the code to be used by the project and is compatible with the license in the root directory of this project.
+
 ## Citing
 
 If you use this code, please cite the associated paper:

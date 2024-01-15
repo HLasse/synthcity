@@ -15,7 +15,7 @@ from pydantic import validate_arguments
 
 # synthcity absolute
 import synthcity.logger as log
-from synthcity.benchmark.utils import augment_data
+from synthcity.benchmark.utils import augment_data, get_json_serializable_kwargs
 from synthcity.metrics import Metrics
 from synthcity.metrics.scores import ScoreEvaluator
 from synthcity.plugins import Plugins
@@ -59,7 +59,6 @@ class Benchmarks:
         use_metric_cache: bool = True,
         **generate_kwargs: Any,
     ) -> pd.DataFrame:
-
         """Benchmark the performance of several algorithms.
 
         Args:
@@ -77,7 +76,7 @@ class Benchmarks:
                     'stats': ['jensenshannon_dist', 'chi_squared_test', 'feature_corr', 'inv_kl_divergence', 'ks_test', 'max_mean_discrepancy', 'wasserstein_dist', 'prdc', 'alpha_precision', 'survival_km_distance'],
                     'performance': ['linear_model', 'mlp', 'xgb', 'feat_rank_distance'],
                     'detection': ['detection_xgb', 'detection_mlp', 'detection_gmm', 'detection_linear'],
-                    'privacy': ['delta-presence', 'k-anonymization', 'k-map', 'distinct l-diversity', 'identifiability_score']
+                    'privacy': ['delta-presence', 'k-anonymization', 'k-map', 'distinct l-diversity', 'identifiability_score', 'DomiasMIA_BNAF', 'DomiasMIA_KDE', 'DomiasMIA_prior']
                 }
             repeats:
                 Number of test repeats
@@ -112,7 +111,7 @@ class Benchmarks:
 
         workspace.mkdir(parents=True, exist_ok=True)
 
-        plugin_cats = ["generic", "privacy"]
+        plugin_cats = ["generic", "privacy", "domain_adaptation"]
         if X.type() == "images":
             plugin_cats.append("images")
         elif task_type == "survival_analysis":
@@ -129,7 +128,10 @@ class Benchmarks:
 
             kwargs_hash = ""
             if len(kwargs) > 0:
-                kwargs_hash_raw = json.dumps(kwargs, sort_keys=True).encode()
+                serializable_kwargs = get_json_serializable_kwargs(kwargs)
+                kwargs_hash_raw = json.dumps(
+                    serializable_kwargs, sort_keys=True
+                ).encode()
                 hash_object = hashlib.sha256(kwargs_hash_raw)
                 kwargs_hash = hash_object.hexdigest()
 
@@ -159,6 +161,10 @@ class Benchmarks:
                     workspace
                     / f"{experiment_name}_{testcase}_{plugin}_{kwargs_hash}_{platform.python_version()}_{repeat}.bkp"
                 )
+                X_ref_syn_cache_file = (
+                    workspace
+                    / f"{experiment_name}_{testcase}_{plugin}_{kwargs_hash}_{platform.python_version()}_{repeat}_reference.bkp"
+                )
                 generator_file = (
                     workspace
                     / f"{experiment_name}_{testcase}_{plugin}_{kwargs_hash}_{platform.python_version()}_generator_{repeat}.bkp"
@@ -176,6 +182,7 @@ class Benchmarks:
                     f"[testcase] Experiment repeat: {repeat} task type: {task_type} Train df hash = {experiment_name}"
                 )
 
+                # TODO: caches should be from the same version of Synthcity. Different APIs will crash.
                 if generator_file.exists() and synthetic_reuse_if_exists:
                     generator = load_from_file(generator_file)
                 else:
@@ -206,6 +213,25 @@ class Benchmarks:
 
                     if synthetic_cache:
                         save_to_file(X_syn_cache_file, X_syn)
+
+                # X_ref_syn is the reference synthetic data used for DomiasMIA metrics
+                if X_ref_syn_cache_file.exists() and synthetic_reuse_if_exists:
+                    X_ref_syn = load_from_file(X_ref_syn_cache_file)
+                else:
+                    try:
+                        X_ref_syn = generator.generate(
+                            count=synthetic_size,
+                            constraints=synthetic_constraints,
+                            **generate_kwargs,
+                        )
+                        if len(X_syn) == 0:
+                            raise RuntimeError("Plugin failed to generate data")
+                    except BaseException as e:
+                        log.critical(f"[{plugin}][take {repeat}] failed: {e}")
+                        continue
+
+                    if synthetic_cache:
+                        save_to_file(X_ref_syn_cache_file, X_ref_syn)
 
                 # Augmentation
                 if metrics and any(
@@ -262,6 +288,8 @@ class Benchmarks:
                 evaluation = Metrics.evaluate(
                     X_test if X_test is not None else X.test(),
                     X_syn,
+                    X.train(),
+                    X_ref_syn,
                     X_augmented,
                     metrics=metrics,
                     task_type=task_type,
